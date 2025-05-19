@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ajedrez Multijugador</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f4f4f4;
+      text-align: center;
+      margin-top: 50px;
+    }
+    #intro, #game {
+      display: none;
+    }
+    input {
+      padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    #waiting {
+      margin-top: 20px;
+      font-weight: bold;
+      color: green;
+    }
+    #game h2 {
+      margin-top: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="intro">
+    <h2>Ingresa tu nombre</h2>
+    <input id="username" type="text" placeholder="Tu nombre" />
+    <br />
+    <button onclick="findMatch()">Buscar partida</button>
+    <div id="waiting"></div>
+  </div>
+
+  <div id="game">
+    <h2 id="greeting"></h2>
+    <div id="board-container">
+      <p>Tablero en construcción...</p>
+    </div>
+  </div>
+
+  <!-- Cliente Socket.IO -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const intro = document.getElementById("intro");
+    const game = document.getElementById("game");
+    const usernameInput = document.getElementById("username");
+    const waiting = document.getElementById("waiting");
+    const greeting = document.getElementById("greeting");
+
+    let playerName = "";
+
+    intro.style.display = "block";
+
+    function findMatch() {
+      const name = usernameInput.value.trim();
+      if (!name) {
+        alert("Debes ingresar un nombre");
+        return;
+      }
+
+      playerName = name;
+      waiting.textContent = "Buscando partida...";
+      socket.emit("find_match", { name: playerName });
+    }
+
+    socket.on("match_found", ({ opponent, yourTurn }) => {
+      intro.style.display = "none";
+      game.style.display = "block";
+      greeting.textContent = `Estás jugando contra ${opponent}. ${yourTurn ? "¡Tú empiezas!" : "Espera tu turno..."}`;
+
+      // Aquí se puede cargar el tablero real más adelante
+      document.getElementById("board-container").innerHTML = "<p>Aquí irá el tablero del juego.</p>";
+    });
+  </script>
+</body>
+</html>
