@@ -1,90 +1,727 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ajedrez Multijugador</title>
   <style>
-    body {
-      font-family: sans-serif;
-      background-color: #f4f4f4;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #333;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      max-width: 90vw;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    h1 {
       text-align: center;
-      margin-top: 50px;
+      color: #4a5568;
+      margin-bottom: 2rem;
+      font-size: 2.5rem;
+      font-weight: 700;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
     }
-    #intro, #game {
-      display: none;
+
+    h2 {
+      text-align: center;
+      color: #2d3748;
+      margin-bottom: 1.5rem;
+      font-size: 1.8rem;
     }
+
+    #intro, #game { 
+      display: none; 
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
     input {
-      padding: 10px;
-      font-size: 16px;
+      font-size: 18px;
+      padding: 12px 20px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      background: #f7fafc;
+      transition: all 0.3s ease;
+      width: 100%;
+      max-width: 300px;
     }
+
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
     button {
-      padding: 10px 20px;
-      font-size: 16px;
-      margin-top: 10px;
+      font-size: 18px;
+      font-weight: 600;
+      padding: 12px 30px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
       cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
     }
-    #waiting {
-      margin-top: 20px;
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    #board { 
+      display: grid; 
+      grid-template-columns: repeat(12, 1fr); 
+      gap: 2px; 
+      margin: 20px auto;
+      background: #2d3748;
+      padding: 10px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      max-width: 600px;
+      aspect-ratio: 1;
+    }
+
+    .cell { 
+      aspect-ratio: 1;
+      background: #f7fafc;
+      border-radius: 4px;
+      font-size: clamp(16px, 3vw, 28px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .cell:hover:not(.blocked) {
+      background: #e2e8f0;
+      transform: scale(1.05);
+    }
+
+    .blocked { 
+      background: linear-gradient(45deg, #2d3748, #4a5568);
+      cursor: not-allowed;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .player1 { 
+      color: #e53e3e;
+      text-shadow: 1px 1px 2px rgba(229, 62, 62, 0.3);
       font-weight: bold;
-      color: green;
     }
-    #game h2 {
-      margin-top: 0;
+
+    .player2 { 
+      color: #3182ce;
+      text-shadow: 1px 1px 2px rgba(49, 130, 206, 0.3);
+      font-weight: bold;
+    }
+
+    .selected { 
+      background: #ffd700 !important;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.6) !important;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .valid-move { 
+      background: #68d391 !important;
+      box-shadow: 0 0 15px rgba(104, 211, 145, 0.5);
+    }
+
+    .valid-move::after {
+      content: "⭐";
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      font-size: 10px;
+      opacity: 0.7;
+    }
+
+    .game-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #edf2f7;
+      padding: 1rem;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .player-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+    }
+
+    .player-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .player1-indicator { background: #e53e3e; }
+    .player2-indicator { background: #3182ce; }
+
+    #status { 
+      font-weight: 600;
+      text-align: center;
+      font-size: 1.2rem;
+      color: #2d3748;
+      background: #f0fff4;
+      padding: 1rem;
+      border-radius: 12px;
+      border-left: 4px solid #38a169;
+      margin: 1rem 0;
+    }
+
+    #debug { 
+      color: #e53e3e;
+      font-size: 12px;
+      text-align: center;
+      margin-top: 10px;
+      font-family: monospace;
+      background: #fed7d7;
+      padding: 0.5rem;
+      border-radius: 8px;
+    }
+
+    #waiting {
+      color: #667eea;
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-top: 1rem;
+      animation: dots 2s infinite;
+    }
+
+    @keyframes dots {
+      0%, 20% { content: "Buscando oponente"; }
+      40% { content: "Buscando oponente."; }
+      60% { content: "Buscando oponente.."; }
+      80%, 100% { content: "Buscando oponente..."; }
+    }
+
+    /* Modal de Victoria/Derrota */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      backdrop-filter: blur(5px);
+    }
+
+    .modal {
+      background: white;
+      padding: 3rem;
+      border-radius: 20px;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: modalAppear 0.5s ease-out;
+    }
+
+    @keyframes modalAppear {
+      from {
+        opacity: 0;
+        transform: scale(0.7) translateY(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .modal h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .modal.victory h2 {
+      color: #38a169;
+    }
+
+    .modal.defeat h2 {
+      color: #e53e3e;
+    }
+
+    .modal p {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+      color: #4a5568;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .modal button {
+      min-width: 120px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      .game-info {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      #board {
+        max-width: 100%;
+      }
+
+      .modal {
+        padding: 2rem;
+      }
+
+      .modal h2 {
+        font-size: 2rem;
+      }
+
+      .modal-buttons {
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        margin: 1rem;
+      }
+
+      .cell {
+        font-size: 20px;
+      }
     }
   </style>
 </head>
 <body>
+  <div class="container">
+    <h1>🏰 Ajedrez Multijugador 🏰</h1>
+    
+    <div id="intro">
+      <h2>Únete a la Batalla</h2>
+      <div class="input-group">
+        <input id="username" type="text" placeholder="Ingresa tu nombre de guerrero" maxlength="20" />
+        <button onclick="findMatch()">⚔️ Buscar Batalla</button>
+      </div>
+      <div id="waiting"></div>
+    </div>
 
-  <div id="intro">
-    <h2>Ingresa tu nombre</h2>
-    <input id="username" type="text" placeholder="Tu nombre" />
-    <br />
-    <button onclick="findMatch()">Buscar partida</button>
-    <div id="waiting"></div>
-  </div>
-
-  <div id="game">
-    <h2 id="greeting"></h2>
-    <div id="board-container">
-      <p>Tablero en construcción...</p>
+    <div id="game">
+      <div class="game-info">
+        <div class="player-info">
+          <span class="player-indicator player1-indicator"></span>
+          <span id="player1-name">Jugador 1</span>
+        </div>
+        <div class="player-info">
+          <span class="player-indicator player2-indicator"></span>
+          <span id="player2-name">Jugador 2</span>
+        </div>
+      </div>
+      
+      <div id="status"></div>
+      <div id="board"></div>
+      <div id="debug"></div>
     </div>
   </div>
 
-  <!-- Cliente Socket.IO -->
+  <!-- Modal de Victoria/Derrota -->
+  <div id="gameEndModal" class="modal-overlay">
+    <div class="modal">
+      <h2 id="modalTitle">🎉 ¡Victoria!</h2>
+      <p id="modalMessage">¡Felicitaciones! Has capturado al rey enemigo.</p>
+      <div class="modal-buttons">
+        <button onclick="resetGame()">🔄 Nueva Partida</button>
+        <button onclick="backToLobby()">🏠 Volver al Lobby</button>
+      </div>
+    </div>
+  </div>
+
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
+    const usernameInput = document.getElementById("username");
     const intro = document.getElementById("intro");
     const game = document.getElementById("game");
-    const usernameInput = document.getElementById("username");
-    const waiting = document.getElementById("waiting");
-    const greeting = document.getElementById("greeting");
+    const board = document.getElementById("board");
+    const status = document.getElementById("status");
+    const debug = document.getElementById("debug");
+    const modal = document.getElementById("gameEndModal");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalMessage = document.getElementById("modalMessage");
+    const player1Name = document.getElementById("player1-name");
+    const player2Name = document.getElementById("player2-name");
+    
+    const playerPieces = ['♚','♛','♜','♝','♞'];
 
-    let playerName = "";
+    let myPlayer = null, opponent = null, myRole = null;
+    let isMyTurn = false;
+    let placed = 0;
+    let blockedCells = new Set();
+    let gameStarted = false;
+    let selectedCell = null;
+    let validMoves = [];
+    let waitingForServerResponse = false;
+    let myName = "";
+
+    function showDebug(msg) {
+      debug.textContent = msg;
+      console.log(msg);
+    }
 
     intro.style.display = "block";
 
     function findMatch() {
       const name = usernameInput.value.trim();
-      if (!name) {
-        alert("Debes ingresar un nombre");
+      if (!name) return alert("⚠️ Debes ingresar tu nombre para continuar");
+      myName = name;
+      socket.emit("find_match", { name });
+      document.getElementById("waiting").textContent = "Buscando oponente...";
+    }
+
+    // Permitir buscar partida con Enter
+    usernameInput.addEventListener("keypress", function(e) {
+      if (e.key === "Enter") findMatch();
+    });
+
+    socket.on("match_found", ({ yourTurn, opponentName, playerId, role }) => {
+      intro.style.display = "none";
+      game.style.display = "block";
+      isMyTurn = yourTurn;
+      myPlayer = playerId;
+      myRole = role;
+      opponent = opponentName;
+      
+      // Actualizar nombres en la interfaz
+      if (myRole === "player1") {
+        player1Name.textContent = myName;
+        player2Name.textContent = opponent;
+      } else {
+        player1Name.textContent = opponent;
+        player2Name.textContent = myName;
+      }
+      
+      showDebug(`Partida iniciada. Rol: ${myRole} | Mi turno: ${isMyTurn}`);
+      socket.emit("request_board");
+    });
+
+    socket.on("init_board", ({ blocked }) => {
+      blockedCells = new Set(blocked);
+      createBoard();
+      updateStatus();
+    });
+
+    function createBoard() {
+      board.innerHTML = "";
+      for (let i = 0; i < 144; i++) {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        cell.setAttribute("data-index", i.toString());
+        if (blockedCells.has(i)) {
+          cell.classList.add("blocked");
+        } else {
+          cell.addEventListener("click", () => handleCellClick(i, cell));
+        }
+        board.appendChild(cell);
+      }
+    }
+
+    function clearHighlights() {
+      document.querySelectorAll(".valid-move").forEach(c => c.classList.remove("valid-move"));
+      document.querySelectorAll(".selected").forEach(c => c.classList.remove("selected"));
+    }
+
+    function handleCellClick(index, cell) {
+      index = Number(index);
+      if (waitingForServerResponse) {
+        showDebug("⏳ Esperando respuesta del servidor...");
         return;
       }
 
-      playerName = name;
-      waiting.textContent = "Buscando partida...";
-      socket.emit("find_match", { name: playerName });
+      if (!gameStarted) {
+        if (!isMyTurn || blockedCells.has(index) || cell.textContent || placed >= playerPieces.length) return;
+        const piece = playerPieces[placed];
+        waitingForServerResponse = true;
+        socket.emit("place_piece", { index, piece });
+      } else {
+        if (!isMyTurn || blockedCells.has(index)) return;
+
+        if (selectedCell === null) {
+          if (!cell.classList.contains(myRole)) return;
+          selectedCell = index;
+          cell.classList.add("selected");
+          validMoves = getValidMovesByPiece(cell.textContent, index);
+          validMoves.forEach(i => {
+            const target = board.querySelector(`[data-index='${i}']`);
+            if (target) target.classList.add("valid-move");
+          });
+        } else {
+          if (index === selectedCell) {
+            clearHighlights();
+            selectedCell = null;
+            return;
+          }
+          if (validMoves.includes(index)) {
+            waitingForServerResponse = true;
+            socket.emit("move_piece", { from: selectedCell, to: index });
+            clearHighlights();
+            selectedCell = null;
+          } else {
+            clearHighlights();
+            selectedCell = null;
+          }
+        }
+      }
     }
 
-    socket.on("match_found", ({ opponent, yourTurn }) => {
-      intro.style.display = "none";
-      game.style.display = "block";
-      greeting.textContent = `Estás jugando contra ${opponent}. ${yourTurn ? "¡Tú empiezas!" : "Espera tu turno..."}`;
-
-      // Aquí se puede cargar el tablero real más adelante
-      document.getElementById("board-container").innerHTML = "<p>Aquí irá el tablero del juego.</p>";
+    socket.on("piece_placed", ({ index, piece, player }) => {
+      waitingForServerResponse = false;
+      const cell = board.querySelector(`[data-index='${index}']`);
+      const className = player === myPlayer ? myRole : (myRole === "player1" ? "player2" : "player1");
+      cell.textContent = piece;
+      cell.classList.add(className);
+      if (player === myPlayer) placed++;
+      isMyTurn = player !== myPlayer;
+      if ((placed >= 5) && document.querySelectorAll(`.${myRole === "player1" ? "player2" : "player1"}`).length >= 5) {
+        gameStarted = true;
+        showDebug("⚔️ ¡Batalla iniciada!");
+      }
+      updateStatus();
     });
+
+    socket.on("piece_moved", ({ from, to, player }) => {
+      waitingForServerResponse = false;
+
+      const fromCell = document.querySelector(`[data-index='${from}']`);
+      const toCell = document.querySelector(`[data-index='${to}']`);
+      const capturedPiece = toCell.textContent;
+
+      if (!fromCell || !toCell) {
+        showDebug(`❌ Error: no se encontró la celda ${from} o ${to}`);
+        return;
+      }
+
+      const piece = fromCell.textContent;
+      const clase = fromCell.classList.contains("player1") ? "player1" : "player2";
+
+      toCell.textContent = piece;
+      toCell.className = "cell " + clase;
+
+      fromCell.textContent = "";
+      fromCell.className = "cell";
+
+      if (blockedCells.has(Number(from))) fromCell.classList.add("blocked");
+
+      isMyTurn = player !== myPlayer;
+      showDebug(`✅ Pieza movida de ${from} a ${to}. Mi turno: ${isMyTurn}`);
+
+      if (capturedPiece === '♚') {
+        if (player === myPlayer) {
+          showVictoryModal(true, "¡Has capturado al rey enemigo! 🏆");
+        } else {
+          showVictoryModal(false, "Tu rey ha sido capturado... 💀");
+        }
+      }
+
+      updateStatus();
+    });
+
+    function showVictoryModal(isVictory, message) {
+      const modalDiv = modal.querySelector('.modal');
+      modalDiv.className = isVictory ? 'modal victory' : 'modal defeat';
+      
+      modalTitle.textContent = isVictory ? "🎉 ¡VICTORIA!" : "💀 DERROTA";
+      modalMessage.textContent = message;
+      
+      modal.style.display = "flex";
+    }
+
+    function resetGame() {
+      modal.style.display = "none";
+      // Reiniciar variables del juego
+      myPlayer = null;
+      opponent = null;
+      myRole = null;
+      isMyTurn = false;
+      placed = 0;
+      blockedCells = new Set();
+      gameStarted = false;
+      selectedCell = null;
+      validMoves = [];
+      waitingForServerResponse = false;
+      
+      // Buscar nueva partida automáticamente
+      socket.emit("find_match", { name: myName });
+      game.style.display = "none";
+      intro.style.display = "block";
+      document.getElementById("waiting").textContent = "Buscando oponente...";
+    }
+
+    function backToLobby() {
+      modal.style.display = "none";
+      game.style.display = "none";
+      intro.style.display = "block";
+      
+      // Limpiar datos
+      myPlayer = null;
+      opponent = null;
+      myRole = null;
+      isMyTurn = false;
+      placed = 0;
+      blockedCells = new Set();
+      gameStarted = false;
+      selectedCell = null;
+      validMoves = [];
+      waitingForServerResponse = false;
+      
+      document.getElementById("waiting").textContent = "";
+    }
+
+    function getValidMovesByPiece(piece, index) {
+      const moves = [];
+      const x = index % 12;
+      const y = Math.floor(index / 12);
+      const directions = {
+        straight: [[1,0], [-1,0], [0,1], [0,-1]],
+        diagonal: [[1,1], [1,-1], [-1,1], [-1,-1]],
+        knight: [
+          [1, 2], [2, 1], [-1, 2], [-2, 1],
+          [1, -2], [2, -1], [-1, -2], [-2, -1]
+        ]
+      };
+
+      function addIfValid(nx, ny) {
+        const ni = ny * 12 + nx;
+        if (nx >= 0 && nx < 12 && ny >= 0 && ny < 12 && !blockedCells.has(ni)) {
+          const target = board.querySelector(`[data-index='${ni}']`);
+          if (target) {
+            const isOwnPiece = target.classList.contains(myRole);
+            if (!isOwnPiece) moves.push(ni);
+          }
+        }
+      }
+
+      if (piece === '♚') {
+        [...directions.straight, ...directions.diagonal].forEach(([dx, dy]) => addIfValid(x + dx, y + dy));
+      } else if (piece === '♛') {
+        [...directions.straight, ...directions.diagonal].forEach(([dx, dy]) => {
+          for (let i = 1; i < 12; i++) {
+            const nx = x + dx * i, ny = y + dy * i;
+            const ni = ny * 12 + nx;
+            if (nx < 0 || nx >= 12 || ny < 0 || ny >= 12 || blockedCells.has(ni)) break;
+            const cell = board.querySelector(`[data-index='${ni}']`);
+            if (cell.textContent === "") {
+              moves.push(ni);
+            } else {
+              const isOwnPiece = cell.classList.contains(myRole);
+              if (!isOwnPiece) moves.push(ni);
+              break;
+            }
+          }
+        });
+      } else if (piece === '♜') {
+        directions.straight.forEach(([dx, dy]) => {
+          for (let i = 1; i < 12; i++) {
+            const nx = x + dx * i, ny = y + dy * i, ni = ny * 12 + nx;
+            if (nx < 0 || ny < 0 || nx >= 12 || ny >= 12 || blockedCells.has(ni)) break;
+            const cell = board.querySelector(`[data-index='${ni}']`);
+            if (cell.textContent === "") {
+              moves.push(ni);
+            } else {
+              const isOwnPiece = cell.classList.contains(myRole);
+              if (!isOwnPiece) moves.push(ni);
+              break;
+            }
+          }
+        });
+      } else if (piece === '♝') {
+        directions.diagonal.forEach(([dx, dy]) => {
+          for (let i = 1; i < 12; i++) {
+            const nx = x + dx * i, ny = y + dy * i, ni = ny * 12 + nx;
+            if (nx < 0 || ny < 0 || nx >= 12 || ny >= 12 || blockedCells.has(ni)) break;
+            const cell = board.querySelector(`[data-index='${ni}']`);
+            if (cell.textContent === "") {
+              moves.push(ni);
+            } else {
+              const isOwnPiece = cell.classList.contains(myRole);
+              if (!isOwnPiece) moves.push(ni);
+              break;
+            }
+          }
+        });
+      } else if (piece === '♞') {
+        directions.knight.forEach(([dx, dy]) => addIfValid(x + dx, y + dy));
+      }
+
+      return moves;
+    }
+
+    function updateStatus() {
+      if (!gameStarted) {
+        status.textContent = placed < 5
+          ? (isMyTurn ? `🎯 Tu turno: coloca ${playerPieces[placed]} (${5-placed} restantes)` : "⏳ Espera tu turno...")
+          : "⏳ Esperando que el oponente termine de colocar...";
+      } else {
+        status.textContent = isMyTurn ? "⚔️ Tu turno: mueve una pieza" : "⏳ Turno del oponente...";
+      }
+    }
   </script>
 </body>
 </html>
