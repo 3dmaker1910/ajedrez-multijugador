@@ -409,7 +409,8 @@
     const player1Name = document.getElementById("player1-name");
     const player2Name = document.getElementById("player2-name");
     
-    const playerPieces = ['♚','♛','♜','♝','♞'];
+    const playerPieces = ['♚', '♜', '♜', '♝', '♝', '♞', '♞'];
+
 
     let myPlayer = null, opponent = null, myRole = null;
     let isMyTurn = false;
@@ -539,10 +540,12 @@
       cell.classList.add(className);
       if (player === myPlayer) placed++;
       isMyTurn = player !== myPlayer;
-      if ((placed >= 5) && document.querySelectorAll(`.${myRole === "player1" ? "player2" : "player1"}`).length >= 5) {
-        gameStarted = true;
-        showDebug("⚔️ ¡Batalla iniciada!");
-      }
+      if ((placed >= playerPieces.length) && 
+    document.querySelectorAll(`.${myRole === "player1" ? "player2" : "player1"}`).length >= playerPieces.length) {
+  gameStarted = true;
+  showDebug("⚔️ ¡Batalla iniciada!");
+}
+
       updateStatus();
     });
 
@@ -579,6 +582,11 @@
           showVictoryModal(false, "Tu rey ha sido capturado... 💀");
         }
       }
+
+
+
+
+
 
       updateStatus();
     });
@@ -713,15 +721,95 @@
       return moves;
     }
 
-    function updateStatus() {
-      if (!gameStarted) {
-        status.textContent = placed < 5
-          ? (isMyTurn ? `🎯 Tu turno: coloca ${playerPieces[placed]} (${5-placed} restantes)` : "⏳ Espera tu turno...")
-          : "⏳ Esperando que el oponente termine de colocar...";
-      } else {
-        status.textContent = isMyTurn ? "⚔️ Tu turno: mueve una pieza" : "⏳ Turno del oponente...";
+
+    function getPieceName(symbol) {
+      switch (symbol) {
+        case '♚': return 'Rey';
+        case '♜': return 'Torre';
+        case '♝': return 'Alfil';
+        case '♞': return 'Caballo';
+        default: return 'Pieza';
       }
     }
-  </script>
+
+    function updateStatus() {
+      if (!gameStarted) {
+        if (placed < playerPieces.length) {
+          if (isMyTurn) {
+            const currentPiece = playerPieces[placed];
+            const name = getPieceName(currentPiece);
+            status.textContent = `🎯 Tu turno: coloca ${name} (${playerPieces.length - placed} restantes)`;
+          } else {
+            status.textContent = "⏳ Espera tu turno...";
+          }
+        } else {
+          status.textContent = "⏳ Esperando que el oponente termine de colocar...";
+        }
+      } else {
+        status.textContent = isMyTurn ? "⚔️ Tu turno: mueve una pieza" : "⏳ Turno del oponente...";
+        checkForCheck(); // 👈 Recién aquí, cuando ya inició el juego
+      }
+    }
+
+    function checkForCheck() {
+  const allCells = document.querySelectorAll('.cell');
+
+  let myKingIndex = -1;
+  let opponentKingIndex = -1;
+
+  const opponentRole = (myRole === "player1") ? "player2" : "player1";
+
+  // Buscar el rey propio y el del oponente
+  allCells.forEach(cell => {
+    const symbol = cell.textContent;
+    const index = parseInt(cell.getAttribute('data-index'));
+
+    if (symbol === '♚') {
+      if (cell.classList.contains(myRole)) {
+        myKingIndex = index;
+      } else if (cell.classList.contains(opponentRole)) {
+        opponentKingIndex = index;
+      }
+    }
+  });
+
+  // Ver si alguna de tus piezas amenaza al rey del oponente
+  let opponentInCheck = false;
+  allCells.forEach(cell => {
+    const symbol = cell.textContent;
+    if (!symbol) return;
+
+    if (cell.classList.contains(myRole)) {
+      const index = parseInt(cell.getAttribute('data-index'));
+      const moves = getValidMovesByPiece(symbol, index);
+      if (moves.includes(opponentKingIndex)) {
+        opponentInCheck = true;
+      }
+    }
+  });
+
+  // Ver si alguna pieza rival amenaza a tu rey
+  let myKingInCheck = false;
+  allCells.forEach(cell => {
+    const symbol = cell.textContent;
+    if (!symbol) return;
+
+    if (cell.classList.contains(opponentRole)) {
+      const index = parseInt(cell.getAttribute('data-index'));
+      const moves = getValidMovesByPiece(symbol, index);
+      if (moves.includes(myKingIndex)) {
+        myKingInCheck = true;
+      }
+    }
+  });
+
+  // Mostrar mensajes correspondientes
+  if (myKingInCheck) {
+    status.textContent = "🛑 ¡Tu rey está en jaque!";
+  } else if (opponentInCheck) {
+    status.textContent = "🚨 ¡Jaque al rey enemigo!";
+  }
+}
+  </script> <!-- ✅ Aquí sí cierras el único bloque de script -->
 </body>
 </html>

@@ -111,7 +111,8 @@ function generateBlockedZones() {
     return [];
   }
 
-  [5, 4, 3, 3].forEach(size => {
+  [5, 5, 4, 4, 4, 3, 3].forEach(size => {
+
     const group = generateGroup(size);
     group.forEach(i => blocked.add(i));
   });
