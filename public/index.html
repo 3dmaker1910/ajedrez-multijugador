@@ -256,6 +256,67 @@
       backdrop-filter: blur(5px);
     }
 
+
+
+
+
+
+
+
+.rules-box {
+  background: #f7fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin-top: 1.5rem;
+  text-align: left;
+  max-height: 250px;
+  overflow-y: auto;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.rules-box h3 {
+  text-align: center;
+  margin-bottom: 0.5rem;
+  color: #2d3748;
+}
+
+.rules-box ol {
+  padding-left: 1rem;
+}
+
+.rules-box ul {
+  list-style: disc;
+  padding-left: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.rules-box li {
+  margin-bottom: 0.4rem;
+}
+
+.rules-box strong {
+  color: #1a202c;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     .modal {
       background: white;
       padding: 3rem;
@@ -362,6 +423,73 @@
         <button onclick="findMatch()">⚔️ Buscar Batalla</button>
       </div>
       <div id="waiting"></div>
+
+
+
+
+
+
+
+
+
+<!-- 📜 Reglas del Juego -->
+<div class="rules-box">
+  <h3>📜 Reglas del Juego</h3>
+
+  <ol>
+    <li><strong>El Campo de Batalla</strong>
+      <ul>
+        <li>El tablero es de <strong>12 x 12 escaques</strong>, pero no todos son iguales.</li>
+        <li><strong>30 escaques serán blancos o vacíos</strong>, formando terrenos irregulares que cambian el mapa de la guerra en cada partida.</li>
+        <li>Ninguna batalla será igual a otra: el azar del terreno define el inicio de cada historia.</li>
+        <li>Cada escaque vacío representa un <strong>obstáculo</strong>, una <strong>montaña</strong>, un <strong>río</strong> o un <strong>desierto intransitable</strong>. Las piezas no pueden ocuparlos ni atravesarlos.</li>
+      </ul>
+    </li>
+
+    <li><strong>Las Fuerzas en Juego</strong>
+      <p>En esta guerra no hay ejércitos de peones ni marchas eternas.<br>
+      Solo los <strong>comandantes y unidades mayores</strong> descienden al campo:</p>
+      <ul>
+        <li><strong>1 Rey</strong> – El corazón de tu ejército. Su caída marca tu derrota.</li>
+        <li><strong>1 Reina</strong> – La fuerza imparable, capaz de cambiar el rumbo de la batalla.</li>
+        <li><strong>2 Torres</strong> – Bastiones móviles, dominan las líneas abiertas como artillería.</li>
+        <li><strong>2 Caballos</strong> – La caballería sigilosa que esquiva obstáculos y embosca al enemigo.</li>
+        <li><strong>2 Alfiles</strong> – Exploradores de diagonales, cruzan el campo como francotiradores.</li>
+      </ul>
+      <p>Cada pieza tiene sus <strong>movimientos clásicos</strong>, pero su <strong>poder cambia según el terreno</strong> y la creatividad del comandante.</p>
+    </li>
+
+    <li><strong>La Filosofía del Combate</strong>
+      <ul>
+        <li>Este no es un ajedrez de espera ni de murallas.</li>
+        <li><strong>Cada turno es un avance o un sacrificio.</strong></li>
+        <li>La <strong>guerra asimétrica</strong> domina: no hay posiciones eternas, solo oportunidades fugaces.</li>
+        <li>Los comandantes deben <strong>leer el terreno, crear emboscadas y controlar las rutas de escape.</strong></li>
+      </ul>
+    </li>
+
+    <li><strong>La Victoria</strong>
+      <ul>
+        <li>Ganas capturando al <strong>Rey enemigo</strong>.</li>
+        <li>No hay jaque mate tradicional: la captura es directa y brutal, como en la guerra real.</li>
+        <li>Solo la astucia y la movilidad deciden quién controla el destino.</li>
+      </ul>
+    </li>
+  </ol>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
     </div>
 
     <div id="game">
